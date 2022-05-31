@@ -1,14 +1,60 @@
-# Project
+# Calipers
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+Calipers is a tool for modeling processor performance through *event-dependence graphs*.
+Calipers takes the program's dynamic instruction trace and a configuration file containing
+microarchitectural and ISA specifications of the processor. It constructs a graph that models
+the dependency and latency between microarchitectural events. Calipers then calculates the
+performance (cycles per instruction) and provides the breakdown of bottlenecks through graph
+analysis.
 
-As the maintainer of this project, please make a few updates:
+For more information, please refer to our publication,
+"Calipers: A Criticality-aware Framework for Modeling Processor Performance," in
+*2022 International Conference on Supercomputing (ICS '22)*.
+([arXiv link](https://arxiv.org/abs/2201.05884))
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Build Instructions
+
+The code has no particular dependencies and can be built with `make`:
+
+```sh
+git clone git@github.com:microsoft/calipers.git
+cd calipers
+make
+```
+
+The code has been built and tested on Ubuntu 18.04.
+
+## Usage Instructions
+
+```sh
+./calipers config_file trace_file result_file
+```
+
+Example:
+
+```sh
+cd build
+./calipers ../demo/InO.cfg ../demo/sample1.trace ./result_InO.txt
+./calipers ../demo/OoO.cfg ../demo/sample2.trace ./result_OoO.txt
+```
+## Directory Structure
+
+- `demo`: Contains sample configuration and trace files.
+Please refer to [README.md](demo/README.md) under this directory for more details.
+- `src`: Contains the source code of the project:
+	- `branch_predictor`: Branch prediction information can be either provided through the trace
+	or obtained from a model. The models are placed in this directory. Currently, it only
+	contains a *statistical model* with configurable accuracy.
+	- `common`: Contains the main and utility functions as well as defined constants and
+	data types.
+	- `graph`: Contains the graph-based modeler and analyzer for an in-order and an out-of-order
+	processor. The latter also has a memory-efficient (advanced) implementation.
+	- `memory`: Load and store information can be either provided through the trace
+	or obtained from a model. The models are placed in this directory. Currently, it contains
+	an *ideal model* (single-cycle loads/stores), a *statistical model* (configurable load/store
+	hit rate and hit/miss cycles), and a *real model* (analytical two-layer cache with
+	configurable size, associativity, and load/store hit/miss cycles).
+	- `trace`: Contains the trace reader/parser. Currently, the RISC-V ISA is supported.
 
 ## Contributing
 
