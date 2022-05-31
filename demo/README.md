@@ -36,4 +36,4 @@ Also, `sample2.trace` (where all trace lines start with `@I`) should be used wit
 because this configuration specifies that particular branch prediction and cache models are used.
 
 <sup>\*</sup> The number of ticks per cycle is defined in
-[calipers_defs.h](src/common/calipers_defs.h).
+[calipers_defs.h](../src/common/calipers_defs.h).
