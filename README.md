@@ -56,6 +56,102 @@ Please refer to [README.md](demo/README.md) under this directory for more detail
 	configurable size, associativity, and load/store hit/miss cycles).
 	- `trace`: Contains the trace reader/parser. Currently, the RISC-V ISA is supported.
 
+## Design Space Exploration
+
+There are two ways for exploring new processor designs:
+1. For a given processor model (such as the ones implemented in
+[inorder_core_graph.cpp](src/graph/inorder_core_graph.cpp) and
+[o3_core_graph.cpp](src/graph/o3_core_graph.cpp), the exposed parameters (such as the ones
+specified in [InO.cfg](demo/InO.cfg) and [OoO.cfg](demo/OoO.cfg) for the implemented models)
+can be varied to configure new designs.
+2. A processor model in Calipers essentially consists of microarchitectural events (graph
+vertices) and dependencies between them (graph edges and their weights) caused by data,
+control, and structural hazards. Therefore, new processors can be modeled by varying the
+events and/or dependencies between them. For example, in-order issue constraint is modeled
+by:
+```cpp
+Vertex execute_vertex(VertexType::InstrExecute, instrCount);
+Vertex prev_execute_vertex(VertexType::InstrExecute, instrCount - 1);
+OutgoingEdge in_order_issue(execute_vertex, 0);
+addEdge(prev_execute_vertex, in_order_issue);
+```
+in `modelPipeline` in [inorder_core_graph.cpp](src/graph/inorder_core_graph.cpp), whereas
+out-of-order issue is modeled by first obtaining a scheduling list for the vertices of type
+`VertexType::InstrExecute` in [o3_core_graph.cpp](src/graph/o3_core_graph.cpp) according to
+data and control dependencies.
+
+### Sample What-if Scenarios
+
+Designers often face what-if scenarios when exploring new designs, e.g., how much a specific
+component of the core is worth optimizing. Such scenarios can be evaluated in Calipers by
+manipulating the graph vertices and edges and/or adjusting edge weights.
+
+- Example 1: branch prediction.
+As discussed in our paper, the effect of improving the branch predictor can be evaluated by
+transforming the edge *E*<sub>*n*</sub> → *F*<sub>*n+1*</sub> to *F*<sub>*n*</sub> → *F*<sub>*n+1*</sub>,
+where instruction *n* is a branch. Therefore, by
+adjusting the `mispredicted` condition in the following code block (derived from `modelPipeline`
+in [o3_core_graph.cpp](src/graph/o3_core_graph.cpp)), we can  model different scenarios.
+For example, by setting `mispredicted` to `false` all the time, a perfect branch predictor is modeled.
+```cpp
+Vertex fetch_vertex(VertexType::InstrFetch, instrCount);
+if (mispredicted)
+{
+    Vertex prev_branch_vertex(VertexType::InstrExecute, instrCount - 1);
+    OutgoingEdge mispredicted_fetch(fetch_vertex, misprdecited_fetch_weight);
+    addEdge(prev_branch_vertex, mispredicted_fetch);
+}
+else
+{
+    Vertex prev_fetch_vertex(VertexType::InstrFetch, instrCount - 1);
+    OutgoingEdge in_order_fetch(fetch_vertex, in_order_fetch_weight);
+    addEdge(prev_fetch_vertex, in_order_fetch);
+}
+```
+
+- Example 2: value prediction.
+Value prediction enables instructions to continue execution even before the source data,
+particularly from an earlier load, is available. Since value prediction demands chip resources,
+it is crucial to know which loads and what fraction of them should be value-predicted for higher
+performance gains. Calipers models data dependency from instruction *n* to instruction *m* by the
+edge *E*<sub>*n*</sub> → *E*<sub>*m*</sub>. Removing such an edge means instruction *n* is
+correctly value-predicted. Different criteria for performing value prediction can be evaluated
+by removing the corresponding edges. For example, setting `is_value_predicted` in the following
+code block (derived from `trackDataDependencies` in
+[o3_core_graph.cpp](src/graph/o3_core_graph.cpp)) should be done according a particular criterion
+for selecting to-be-value-predicted loads.
+```cpp
+if (reg_written_by_load && !is_value_predicted)
+{
+    Vertex execute_vertex(VertexType::InstrExecute, instrCount);
+    Vertex prev_mem_vertex(VertexType::MemExecute, load_num);
+    OutgoingEdge dependence_edge(execute_vertex, data_weight);
+    addEdge(prev_mem_vertex, dependence_edge);
+}
+```
+
+### Leveraging Vectorization
+
+Calipers introduces *vectorized* graphs, wherein a vector of weights instead of a scalar value
+can be assigned to each edge. Vectorization allows multiple configurations to be modeled
+and analyzed simultaneously. Using vectorization, Calipers does not need to construct the graph
+from scratch in *N* separate runs, i.e., using *N* separate threads of execution, for *N*
+configurations.
+
+The width of the edge-weight vectors, `VECTOR_WIDTH`, is defined in
+[calipers_defs.h](src/common/calipers_defs.h). As an example, assume that we want to model three
+different decode cycles simultaneously. Therefore, `VECTOR_WIDTH` is set to 3. The decode edge
+can be created as follows:
+```cpp
+Vertex fetch_vertex(VertexType::InstrFetch, instrCount);
+Vertex dispatch_vertex(VertexType::InstrDispatch, instrCount);
+int64_t decode_vec[VECTOR_WIDTH] = {base_weight, base_weight + 1, base_weight + 2};
+OutgoingEdge fetch_after_dispatch(dispatch_vertex, Vector(decode_vec, VECTOR_WIDTH));
+addEdge(fetch_vertex, fetch_after_dispatch);
+```
+In this example, other edges can be created as if their weights were scalars. For them, the
+elements of the weight vector will have the same value.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
