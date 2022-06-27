@@ -1,4 +1,4 @@
-# Calipers
+# Calipers <img align="right" src="calipers_logo.png" width="200px">
 
 Calipers is a tool for modeling processor performance through *event-dependence graphs*.
 Calipers takes the program's dynamic instruction trace and a configuration file containing
