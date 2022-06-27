@@ -7,7 +7,7 @@ issues before filing new issues to avoid duplicates.  For new issues, file your 
 feature request as a new Issue.
 
 For help and questions about using this project, please contact 
-[hosseing@umich.edu](mailto:hosseing@umich.edu).
+[hosseing@umich.edu](mailto:hosseing@umich.edu), [gagg@microsoft.com](mailto:gagg@microsoft.com).
 
 ## Microsoft Support Policy  
 
