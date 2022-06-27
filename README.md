@@ -8,9 +8,11 @@ performance (cycles per instruction) and provides the breakdown of bottlenecks t
 analysis.
 
 For more information, please refer to our publication,
-"Calipers: A Criticality-aware Framework for Modeling Processor Performance," in
-*2022 International Conference on Supercomputing (ICS '22)*.
-([arXiv link](https://arxiv.org/abs/2201.05884))
+"[Calipers: A Criticality-aware Framework for Modeling Processor Performance](https://dl.acm.org/doi/abs/10.1145/3524059.3532390)," in
+*Proceedings of the 36th ACM International Conference on Supercomputing (ICS '22)*.
+([extended version on arXiv](https://arxiv.org/abs/2201.05884))
+
+A recording of the ICS'22 conference presentation is available on [Youtube](https://www.youtube.com/watch?v=VetEa0Tm1As).
 
 ## Build Instructions
 
