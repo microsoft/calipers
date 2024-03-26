@@ -12,7 +12,7 @@ For more information, please refer to our publication,
 *Proceedings of the 36th ACM International Conference on Supercomputing (ICS '22)*.
 ([extended version on arXiv](https://arxiv.org/abs/2201.05884))
 
-A recording of the ICS'22 conference presentation is available on [YouTube](https://www.youtube.com/watch?v=harZF06MsKk).
+A recording of the ICS'22 conference presentation is available on [YouTube](https://www.youtube.com/watch?v=QP9uVPTna_s).
 
 ## Build Instructions
 
