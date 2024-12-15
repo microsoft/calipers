@@ -61,7 +61,7 @@ class Graph
 
     struct ScheduleComparison
     {
-        bool operator()(const pair<uint64_t, int64_t>& lhs, const pair<uint64_t, int64_t>& rhs)
+        bool operator()(const pair<uint64_t, int64_t>& lhs, const pair<uint64_t, int64_t>& rhs) const
         {
             if (lhs.second != rhs.second)
             {
